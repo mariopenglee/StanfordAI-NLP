@@ -36,7 +36,7 @@ class PartialParse(object):
         """
         ### START CODE HERE
 
-        if transition == "S":u
+        if transition == "S":
             self.stack.append(self.buffer.pop(0))
         elif transition == "LA":
             self.dependencies.append((self.stack[-1],self.stack[-2]))
@@ -91,8 +91,8 @@ def minibatch_parse(sentences, model, batch_size):
             if not pp.buffer and len(pp.stack) == 1:
                 unfinished_parses.remove(pp)
     dependencies = [pp.dependencies for pp in partial_parses]
-        
-    
+
+
     ### END CODE HERE
 
     return dependencies
