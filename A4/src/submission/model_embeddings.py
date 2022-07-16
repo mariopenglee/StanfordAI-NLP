@@ -3,7 +3,7 @@
 
 import torch.nn as nn
 
-class ModelEmbeddings(nn.Module): 
+class ModelEmbeddings(nn.Module):
     """
     Class that converts input words to their embeddings.
     """
@@ -42,6 +42,6 @@ class ModelEmbeddings(nn.Module):
         ###     Embedding Layer:
         ###         https://pytorch.org/docs/stable/nn.html#torch.nn.Embedding
         ### START CODE HERE (~2 Lines)
+        self.source = nn.Embedding(len(vocab.src), embed_size, padding_idx=Nsrc_pad_token_idx)
+        self.target = nn.Embedding(len(vocab.tgt), embed_size, padding_idx=Ntgt_pad_token_idx)
         ### END CODE HERE
-
-
