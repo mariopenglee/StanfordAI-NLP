@@ -164,7 +164,7 @@ class NMT(nn.Module):
         ###         https://pytorch.org/docs/stable/tensors.html#torch.Tensor.permute
         ### START CODE HERE (~ 8 Lines)
         x = self.model_embeddings.source(source_padded)
-        x = nn.utils.rnn.pack_padded_sequence(x, source_lengths)
+        x = pack_padded_sequence(x, source_lengths)
         enc_hiddens, (last_hidden, last_cell) = self.encoder(x)
         enc_hiddens = pad_packed_sequence(enc_hiddens)[0].permute(1, 0, 2)
         concatenated = torch.cat((last_hidden[0], last_hidden[1]), 1)
@@ -243,7 +243,7 @@ class NMT(nn.Module):
         Y = self.model_embeddings.target(target_padded)
 
         for y_t in torch.split(Y, 1, dim = 0):
-            Ybar_t = torch.cat((torch.squeeze(y_t, 0), o_prev),1)
+            Ybar_t = torch.cat((torch.squeeze(y_t, 0), o_prev),1) ###by modifying y_t you fuck up the loop.
             dec_state, o_t, _ = self.step(Ybar_t, dec_state, enc_hiddens, enc_hiddens_proj, enc_masks)
             combined_outputs.append(o_t)
             o_prev = o_t
