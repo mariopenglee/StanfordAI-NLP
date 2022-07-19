@@ -167,9 +167,8 @@ class NMT(nn.Module):
         x = pack_padded_sequence(x, source_lengths)
         enc_hiddens, (last_hidden, last_cell) = self.encoder(x)
         enc_hiddens = pad_packed_sequence(enc_hiddens)[0].permute(1, 0, 2)
-        concatenated = torch.cat((last_hidden[0], last_hidden[1]), 1)
-        init_decoder_hidden = self.h_projection(concatenated)
-        init_decoder_cell = self.c_projection(concatenated)
+        init_decoder_hidden = self.h_projection(torch.cat((last_hidden[0], last_hidden[1]), 1))
+        init_decoder_cell = self.c_projection(torch.cat((last_cell[0], last_cell[1]), 1))
         dec_init_state = (init_decoder_hidden, init_decoder_cell)
         ### END CODE HERE
 
