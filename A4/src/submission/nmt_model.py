@@ -166,7 +166,7 @@ class NMT(nn.Module):
         x = self.model_embeddings.source(source_padded)
         x = nn.utils.rnn.pack_padded_sequence(x, source_lengths)
         enc_hiddens, (last_hidden, last_cell) = self.encoder(x)
-        enc_hiddens = nn.utils.rnn.pad_packed_sequence(enc_hiddens, batch_first = True)
+        enc_hiddens = pad_packed_sequence(enc_hiddens)[0].permute(1, 0, 2)
         concatenated = torch.cat((last_hidden[0], last_hidden[1]), 1)
         init_decoder_hidden = self.h_projection(concatenated)
         init_decoder_cell = self.c_projection(concatenated)
@@ -243,9 +243,8 @@ class NMT(nn.Module):
         Y = self.model_embeddings.target(target_padded)
 
         for y_t in torch.split(Y, 1, dim = 0):
-            y_t = torch.squeeze(y_t)
-            Ybar_t = torch.cat((y_t, o_prev),1)
-            dec_state, o_t = self.step(Ybar_t = Ybar_t, dec_state = dec_state, enc_hiddens = enc_hiddens, enc_hiddens_proj = enc_hiddens_proj, enc_masks = enc_masks)
+            Ybar_t = torch.cat((torch.squeeze(y_t, 0), o_prev),1)
+            dec_state, o_t, _ = self.step(Ybar_t, dec_state, enc_hiddens, enc_hiddens_proj, enc_masks)
             combined_outputs.append(o_t)
             o_prev = o_t
 
@@ -344,6 +343,13 @@ class NMT(nn.Module):
         ###     Tanh:
         ###         https://pytorch.org/docs/stable/torch.html#torch.tanh
         ### START CODE HERE (~6 Lines)
+        alpha_t = nn.functional.softmax(e_t,1)
+        a_t = torch.bmm(alpha_t.unsqueeze(1), enc_hiddens).squeeze(1)
+        U_t = torch.cat((dec_hidden,a_t),1)
+        V_t = self.combined_output_projection(U_t)
+        O_t = self.dropout(torch.tanh(V_t))
+
+
         ### END CODE HERE
 
         combined_output = O_t
