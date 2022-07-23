@@ -1,0 +1,100 @@
+#root table {
+  border-collapse:collapse;
+}
+
+#root table td {
+  padding:.25em;
+  border:1px solid var(--su-fog);
+}
+
+#root table th {
+  padding:.5em .25em;
+  background-color:var(--su-black);
+  color: var(--su-white);
+  border:1px solid var(--su-stone-legacy);
+  border-top:none;
+  border-bottom: none;
+}
+
+#root table th:first-child {
+  border-left:1px solid var(--su-black);
+}
+
+#root table th:last-child {
+  border-right:1px solid var(--su-black);
+}
+
+#root table input {
+  width:100%;
+  -moz-box-shadow:    inset 0 0 4px #000000;
+   -webkit-box-shadow: inset 0 0 4px #000000;
+   box-shadow:         inset 0 0 4px #000000;
+}
+
+.vjs-playback-rate .vjs-playback-rate-value {
+  font-size: 1.3em !important;
+  line-height: 2.2 !important;
+}
+
+.video-js {
+  flex-grow: 1;
+  height: auto;
+  width: auto;
+}
+
+.vjs-marker {
+  font-size:20px;
+  bottom: .9em!important;
+  background-color: transparent !important;
+  margin-left: -3px !important;
+}
+
+.marker-clip-type {
+  color:var(--su-poppy);
+}
+
+.marker-bookmark-type {
+  color:#6fcf97;
+}
+
+.marker-quiz-type {
+  color:#f2c94c;
+}
+
+.vjs-big-play-button {
+  margin: auto!important;
+}
+
+.video-js .vjs-big-play-button {
+  --radius: 2.5em;
+  top: calc(50% - var(--radius)/2) !important;
+  left: calc(50% - var(--radius)/2) !important;
+  width: var(--radius) !important;
+  height: var(--radius) !important;
+  line-height: var(--radius) !important;
+  border: none !important;
+  border-radius: 50% !important;
+}
+
+#root>.fullscreenmode {
+  --video-width:
+    calc( (1 / var(--video-aspect-ratio, 9/16)) * 100vh );
+  --video-height: 100vh;
+}
+
+.vjs-watermark-content {
+  right: calc((var(--video-element-width) - var(--video-width)) / 2) !important;
+}
+
+.vjs-watermark-content img{
+  /* height: 30px; */
+  width: 140px;
+}
+
+.vjs-control-bar {
+  z-index: 1;
+}
+
+.vjs-watermark-fade {
+  opacity: 1 !important;
+}

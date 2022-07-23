@@ -1,0 +1,24 @@
+.vjs-resolution-button .vjs-icon-placeholder:before {
+  content: '\f114';
+  font-family: VideoJS;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 1.8em;
+  line-height: 1.67em;
+}
+
+.vjs-resolution-button .vjs-control-text {
+  font-size: 1em;
+  line-height: 3em;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  box-sizing: inherit;
+}
+
+.vjs-resolution-button .vjs-control-text.show {
+  clip: unset;
+}
