@@ -22,6 +22,8 @@ def initialize_synthesizer_model(mconf):
     ### [part g]: Make some other model here
 
     ### START CODE HERE
+    mconf.synthesizer = True
+    attention_model = GPT(mconf)
     ### END CODE HERE
     return attention_model
 
@@ -61,9 +63,16 @@ def finetune(reading_params_path, finetune_corpus_path, pretrain_dataset, block_
     trainer_obj = None #Trainer object (see trainer.py for more details)
     tconf = None #TrainerConfig object (see trainer.py for more details)
     ### START CODE HERE
-    tconf = TrainerConfig(max_epochs=75, batch_size=256, learning_rate=6e-4,
-    lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size,
-    num_workers=1)
+    if reading_params_path:
+        tconf = TrainerConfig(max_epochs=10, batch_size=256, learning_rate=6e-4,
+        lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size,
+        num_workers=4)
+    ### load into parameters
+        model.load_state_dict(torch.load(reading_params_path, map_location=torch.device('cpu')))
+    else:
+        tconf = TrainerConfig(max_epochs=75, batch_size=256, learning_rate=6e-4,
+        lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size,
+        num_workers=4)
     text = open(finetune_corpus_path, 'r').read()
     finetune_dataset = NameDataset(text, pretrain_dataset)
     trainer_obj = Trainer(model, finetune_dataset, None, tconf)
@@ -92,6 +101,12 @@ def pretrain(pretrain_dataset, block_size, model):
     tconf = None #TrainerConfig object (see trainer.py for more details)
 
     ### START CODE HERE
+    tconf = TrainerConfig(
+    max_epochs=650, batch_size=128, learning_rate=6e-3, lr_decay=True,
+    warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size,
+    num_workers=4
+    )
+    trainer_obj = Trainer(model, pretrain_dataset, None, tconf)
     ### END CODE HERE
     return tconf, trainer_obj
 
@@ -104,7 +119,9 @@ def train(model, writing_params_path, trainer_obj):
     ### Note: trainer_obj is of type Trainer (see trainer.py for more details)
 
     ### START CODE HERE
+
     trainer_obj.train()
-    writing_params_path = model.parameters
+    torch.save(model.state_dict(), writing_params_path)
+
     ### END CODE HERE
     return

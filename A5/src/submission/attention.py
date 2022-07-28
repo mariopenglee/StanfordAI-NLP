@@ -96,6 +96,31 @@ class SynthesizerAttention(nn.Module):
         ###       How do these map to the matrices in the handout?
 
         ### START CODE HERE
+        # (B x T x C) is of dimension (batch x block_size x n_embd) which is (batch x l x d) in the handout.
+        # nh should be number_of_heads, and hs would then stand for n_embed (or "dimensionality" d in the handout) per head
+
+        B, T, C = x.size() ## X is B x l x d
+
+        # calculate the two weights and value for all heads in batch and move head forward to be the batch dim
+        a = self.w1(x).view(B, T, self.n_head, C // self.n_head).transpose(1, 2) # (B, C, T, hs) (batch x l x d x d/h)
+        b = self.w2[:, :T] # (hs, T) (d/h x l), input block_size is not the same as config block size (batching)
+        v = self.value(x).view(B, T, self.n_head, C // self.n_head).transpose(1, 2) # (B, nh, T, hs) ((mini batch)) x d/h)
+
+        # synthesizer attention; softmax(ReLU(XAi)Bi+b2)
+        att = F.relu(a)
+        att = (att@b) # this is a@b (B, nh, T, hs) x (hs, T) -> (B, nh, T, T)
+        att = att + self.b2[:T] #B x hn, T, T + T
+        att = att.masked_fill(self.mask[:,:,:T,:T] == 0, -1e10) # todo: just use float('-inf') instead?
+        att = F.softmax(att, dim=-1)
+
+        ##should be the same.
+        att = self.attn_drop(att)
+        y = att @ v # (B, nh, T, T) x (B, nh, T, hs) -> (B, nh, T, hs)
+        y = y.transpose(1, 2).contiguous().view(B, T, C) # re-assemble all head outputs side by side
+
+        # output projection
+        y = self.resid_drop(self.proj(y))
+        return y
         ### END CODE HERE
 
         raise NotImplementedError

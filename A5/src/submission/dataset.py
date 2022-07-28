@@ -175,6 +175,34 @@ class CharCorruptionDataset(Dataset):
         ### [part e]: see spec above
 
         ### START CODE HERE
+        document = self.data[idx]
+        ###1 truncate element to between 4 chars and int(self.block_size*7/8) characters
+        doc_len = random.randrange(4,int(self.block_size*7/8))
+        document = document[:doc_len]
+        ###2 split into 3 strings Randomly: prefix, masked_content, suffix. masked
+        ### should be about 1/4 of the doc on average.
+        qdoc_len = int(doc_len/4)
+        masked_content_len = random.randrange(qdoc_len-2, qdoc_len+3)
+        if masked_content_len<1:
+            masked_content_len=1
+        prefix_len = int((doc_len-masked_content_len)/2)
+        prefix = document[:prefix_len]
+        masked_content = document[prefix_len:prefix_len+masked_content_len]
+        suffix = document[prefix_len+masked_content_len:]
+        ###3 get masked string which is prefix, mask, suffix, mask, masked, mask, pad
+        masked_string = prefix + self.MASK_CHAR + suffix + self.MASK_CHAR + masked_content + self.MASK_CHAR
+        npads = self.block_size - len(masked_string)
+        masked_string = masked_string + self.PAD_CHAR * npads
+        ###4 get input and output x and y. goal is that for each char,
+        ### we predict the next char. (for input x, we predict y same index)
+        x = masked_string[:-1]
+        y = masked_string[1:]
+        ### get long tensor from those and return the resulting data point
+        tensorx = [self.stoi[xi] for xi in x]
+        tensory = [self.stoi[yi] for yi in y]
+        tensorx = torch.LongTensor(tensorx)
+        tensory = torch.LongTensor(tensory)
+        return (tensorx, tensory)
         ### END CODE HERE
 
         raise NotImplementedError
