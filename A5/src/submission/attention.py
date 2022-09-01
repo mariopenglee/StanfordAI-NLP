@@ -103,13 +103,13 @@ class SynthesizerAttention(nn.Module):
 
         # calculate the two weights and value for all heads in batch and move head forward to be the batch dim
         a = self.w1(x).view(B, T, self.n_head, C // self.n_head).transpose(1, 2) # (B, C, T, hs) (batch x l x d x d/h)
-        b = self.w2[:, :T] # (hs, T) (d/h x l)
+        b = self.w2[:, :T] # (hs, T) (d/h x l), input block_size is not the same as config block size (batching)
         v = self.value(x).view(B, T, self.n_head, C // self.n_head).transpose(1, 2) # (B, nh, T, hs) ((mini batch)) x d/h)
 
-        # synthesizer attention; softmax(ReLU(XAi+b1)Bi+b2) a@b (B, nh, T, hs) x (hs, T) -> (B, nh, T, T)
+        # synthesizer attention; softmax(ReLU(XAi)Bi+b2)
         att = F.relu(a)
-        att = (att@b) # this is
-        att = att + self.b2[:T] #B x hn, T, T + T
+        att = (att@b) # this is a@b (B, nh, T, hs) x (hs, T) -> (B, nh, T, T)
+        att = att + self.b2[:T] #./run.sh synthesizer_eval_test_with_pretrainB x hn, T, T + T
         att = att.masked_fill(self.mask[:,:,:T,:T] == 0, -1e10) # todo: just use float('-inf') instead?
         att = F.softmax(att, dim=-1)
 
